@@ -1,3 +1,4 @@
+import asyncio
 import pygame
 import math
 
@@ -177,36 +178,34 @@ class IsometricGrid:
                 pygame.draw.polygon(surface, WHITE, points, 2)
 
 
-def main():
+async def main():
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("Isometric Grid")
+    
     clock = pygame.time.Clock()
     grid = IsometricGrid(GRID_SIZE, GRID_SIZE)
-    player = Player(2, 2)  # Use the global constants
-    running = True
+    player = Player(2, 2)
     
-    while running:
+    while True:
         mouse_pos = pygame.mouse.get_pos()
         hovered_tile = iso_to_cart(*mouse_pos)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                return
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:  # Left click
+                    player.move_to_tile(*hovered_tile)
 
-        # Check for held mouse button
-        mouse_buttons = pygame.mouse.get_pressed()
-        if mouse_buttons[0]:  # Left mouse button
-            player.move_to_tile(*hovered_tile)
-
-        player.update()  # Add this line to update player movement
+        player.update()
         
-        # Draw
         screen.fill(BLACK)
         grid.draw(screen, highlight_tile=hovered_tile)
         player.draw(screen)
+        
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
-    pygame.quit()
-
-
-if __name__ == "__main__":
-    main()
+asyncio.run(main())
